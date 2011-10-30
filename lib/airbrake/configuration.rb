@@ -92,6 +92,7 @@ module Airbrake
     attr_accessor :rescue_rake_exceptions
     
     # Should Airbrake send notices in a separate thread?
+    # Note: This will disable the user_information option
     # (boolean or nil; set to nil to not send notices in a separate thread; default is nil)
     attr_accessor :async
 

@@ -133,6 +133,7 @@ module Airbrake
       if configuration.public?
         if configuration.async?
           Airbrake::Sender.queue << [sender, notice.to_xml]
+          nil
         else
           sender.send_to_airbrake(notice.to_xml)
         end
