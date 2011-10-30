@@ -25,6 +25,13 @@ class NotifierTest < Test::Unit::TestCase
     Airbrake.configure { |config| config.environment_name = 'production' }
   end
 
+  def set_public_and_async_env
+    Airbrake.configure do |config| 
+      config.environment_name = 'production'
+      config.async = true
+    end
+  end
+
   def set_development_env
     Airbrake.configure { |config| config.environment_name = 'development' }
   end
@@ -69,6 +76,28 @@ class NotifierTest < Test::Unit::TestCase
     Airbrake.notify(exception)
 
     assert_sent notice, :exception => exception
+  end
+  
+  should "create and send a notice for an exception asynchronously" do
+    set_public_and_async_env
+    exception = build_exception
+    stub_sender!
+    notice = stub_notice!
+
+    Airbrake.notify(exception)
+
+    assert_sent notice, :exception => exception
+  end
+  
+  should "create and send a notice for a hash asynchronously" do
+    set_public_and_async_env
+    notice = stub_notice!
+    notice_args = { :error_message => 'uh oh' }
+    stub_sender!
+
+    Airbrake.notify(notice_args)
+
+    assert_sent(notice, notice_args)
   end
 
   should "create and send a notice for a hash" do
@@ -146,7 +175,7 @@ class NotifierTest < Test::Unit::TestCase
     config_opts = { 'one' => 'two', 'three' => 'four' }
     notice = stub_notice!
     stub_sender!
-    Airbrake.configuration = stub('config', :merge => config_opts, :public? => true)
+    Airbrake.configuration = stub('config', :merge => config_opts, :public? => true, :async? => nil)
 
     Airbrake.notify(exception)
 

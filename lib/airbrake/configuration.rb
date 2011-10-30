@@ -8,7 +8,7 @@ module Airbrake
         :ignore_user_agent, :notifier_name, :notifier_url, :notifier_version,
         :params_filters, :project_root, :port, :protocol, :proxy_host,
         :proxy_pass, :proxy_port, :proxy_user, :secure, :framework,
-        :user_information, :rescue_rake_exceptions].freeze
+        :user_information, :rescue_rake_exceptions, :async].freeze
 
     # The API key for your project, found on the project edit form.
     attr_accessor :api_key
@@ -90,6 +90,10 @@ module Airbrake
     # Should Airbrake catch exceptions from Rake tasks?
     # (boolean or nil; set to nil to catch exceptions when rake isn't running from a terminal; default is nil)
     attr_accessor :rescue_rake_exceptions
+    
+    # Should Airbrake send notices in a separate thread?
+    # (boolean or nil; set to nil to not send notices in a separate thread; default is nil)
+    attr_accessor :async
 
     DEFAULT_PARAMS_FILTERS = %w(password password_confirmation).freeze
 
@@ -139,6 +143,7 @@ module Airbrake
       @framework                = 'Standalone'
       @user_information         = 'Airbrake Error {{error_id}}'
       @rescue_rake_exceptions   = nil
+      @async                    = nil
     end
 
     # Takes a block and adds it to the list of backtrace filters. When the filters
@@ -209,6 +214,10 @@ module Airbrake
     # @return [Boolean] Returns +false+ if in a development environment, +true+ otherwise.
     def public?
       !development_environments.include?(environment_name)
+    end
+    
+    def async?
+      @async
     end
 
     def port

@@ -17,8 +17,10 @@ module Airbrake
         :host, :port, :secure, :http_open_timeout, :http_read_timeout].each do |option|
         instance_variable_set("@#{option}", options[option])
       end
+      self.class.queue
+      self.class.thread
     end
-
+    
     # Sends the notice data off to Airbrake for processing.
     #
     # @param [String] data The XML notice to be sent off
@@ -59,7 +61,22 @@ module Airbrake
         error_id[1] if error_id
       end
     end
-
+    
+    def self.queue
+      return unless Airbrake.configuration.async?
+      @queue ||= Queue.new
+    end
+    
+    def self.thread
+      return unless Airbrake.configuration.async?
+      @thread ||= Thread.new do
+        while args = @queue.pop
+          sender = args.shift
+          sender.send_to_airbrake(args.shift)
+        end
+      end
+    end
+    
     private
 
     attr_reader :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :protocol,
