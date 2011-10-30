@@ -77,6 +77,12 @@ module Airbrake
       end
     end
     
+    def self.reset_thread!
+      return unless Airbrake.configuration.async?
+      @thread = nil
+      thread
+    end
+    
     private
 
     attr_reader :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :protocol,

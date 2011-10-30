@@ -15,6 +15,7 @@ require 'airbrake/sender'
 require 'airbrake/backtrace'
 require 'airbrake/rack'
 require 'airbrake/user_informer'
+require 'airbrake/async_passenger'
 
 require 'airbrake/railtie' if defined?(Rails::Railtie)
 
